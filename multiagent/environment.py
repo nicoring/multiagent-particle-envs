@@ -146,9 +146,9 @@ class MultiAgentEnv(gym.Env):
         # process action
         if isinstance(action_space, spaces.MultiDiscrete):
             act = []
-            size = action_space.high - action_space.low + 1
+            sizes = action_space.nvec
             index = 0
-            for s in size:
+            for s in sizes:
                 act.append(action[index:(index+s)])
                 index += s
             action = act
