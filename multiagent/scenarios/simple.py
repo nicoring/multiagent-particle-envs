@@ -1,8 +1,8 @@
 import numpy as np
 from multiagent.core import World, Agent, Landmark
-from multiagent.scenario import BaseScenario
+from multiagent.scenario import ShapedRewardScenario
 
-class Scenario(BaseScenario):
+class Scenario(ShapedRewardScenario):
     def make_world(self):
         world = World()
         # add agents
@@ -38,9 +38,18 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np.random.uniform(-1,+1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent, world):
-        dist2 = np.sum(np.square(agent.state.p_pos - world.landmarks[0].state.p_pos))
-        return -dist2 #np.exp(-dist2)
+    def _reward(self, agent, world, shaped):
+        target = world.landmarks[0]
+        if shaped:
+            dist2 = np.sum(np.square(agent.state.p_pos - target.state.p_pos))
+            reward = -np.sqrt(dist2) #np.exp(-dist2)
+        else:
+            reward = 1.0 if self.is_collision(agent, target) else 0.0
+        return reward
+
+    def done(self, agent, world):
+        target = world.landmarks[0]
+        return self.is_collision(agent, target)
 
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame

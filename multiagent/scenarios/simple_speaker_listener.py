@@ -1,8 +1,8 @@
 import numpy as np
 from multiagent.core import World, Agent, Landmark
-from multiagent.scenario import BaseScenario
+from multiagent.scenario import ShapedRewardScenario
 
-class Scenario(BaseScenario):
+class Scenario(ShapedRewardScenario):
     def make_world(self):
         world = World()
         # set any world properties first
@@ -59,11 +59,19 @@ class Scenario(BaseScenario):
         # returns data for benchmarking purposes
         return reward(agent, reward)
 
-    def reward(self, agent, world):
+    def _reward(self, agent, world, shaped=False):
         # squared distance from listener to landmark
         a = world.agents[0]
-        dist2 = np.sum(np.square(a.goal_a.state.p_pos - a.goal_b.state.p_pos))
-        return -dist2
+        if shaped:
+            dist2 = np.sum(np.square(a.goal_a.state.p_pos - a.goal_b.state.p_pos))
+            reward = -np.sqrt(dist2)
+        else:
+            reward = 1.0 if self.is_collision(a.goal_a, a.goal_b) else 0.0
+        return reward
+
+    def done(self, agent, world):
+        a = world.agents[0]
+        return self.is_collision(a.goal_a, a.goal_b)
 
     def observation(self, agent, world):
         # goal color
