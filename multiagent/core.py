@@ -113,6 +113,16 @@ class World(object):
     def scripted_agents(self):
         return [agent for agent in self.agents if agent.action_callback is not None]
 
+    # return all agents that are not adversaries
+    @property
+    def good_agents(self):
+        return [agent for agent in self.agents if not agent.adversary]
+
+    # return all adversarial agents
+    @property
+    def adversaries(self):
+        return [agent for agent in self.agents if agent.adversary]
+
     # update state of the world
     def step(self):
         # set actions for scripted agents 

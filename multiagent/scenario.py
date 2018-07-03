@@ -4,6 +4,8 @@ import numpy as np
 class BaseScenario(object):
     """defines scenario upon which the world is built"""
 
+    MIN_COVER_DIST = 0.05
+
     @property
     def has_shaped_reward(self):
         return False
@@ -20,17 +22,29 @@ class BaseScenario(object):
         return False
 
     @staticmethod
-    def is_collision(agent1, agent2):
+    def dist(agent1, agent2):
         delta_pos = agent1.state.p_pos - agent2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta_pos)))
+        return dist
+
+    def is_collision(self, agent1, agent2):
+        dist = self.dist(agent1, agent2)
         dist_min = agent1.size + agent2.size
         return dist < dist_min
+
+    def does_cover(self, agent1, agent2):
+        dist = self.dist(agent1, agent2)
+        return dist < self.MIN_COVER_DIST
+
 
 class ShapedRewardScenario(BaseScenario):
 
     @property
     def has_shaped_reward(self):
         return True
+    
+    def reward(self, agent, world):
+        return self.shaped_reward(agent, world)
 
     def _reward(self, agent, world, shaped):
         raise NotImplementedError()
