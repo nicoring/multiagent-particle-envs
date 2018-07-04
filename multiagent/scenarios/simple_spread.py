@@ -9,7 +9,7 @@ class Scenario(BaseScenario):
     def make_world(self):
         world = World()
         # set any world properties first
-        world.dim_c = 2
+        world.dim_c = 5
         num_agents = 3
         num_landmarks = 3
         # add agents
