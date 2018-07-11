@@ -4,7 +4,7 @@ import numpy as np
 class BaseScenario(object):
     """defines scenario upon which the world is built"""
 
-    MIN_COVER_DIST = 0.05
+    MIN_COVER_DIST = 0.1
 
     @property
     def has_shaped_reward(self):

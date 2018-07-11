@@ -1,10 +1,10 @@
 import numpy as np
 from multiagent.core import World, Agent, Landmark
-from multiagent.scenario import BaseScenario
+from multiagent.scenario import ShapedRewardScenario
 import random
 
 
-class Scenario(BaseScenario):
+class Scenario(ShapedRewardScenario):
 
     def make_world(self):
         world = World()
@@ -74,14 +74,17 @@ class Scenario(BaseScenario):
     def adversaries(self, world):
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent, world):
+    def _reward(self, agent, world, shaped):
         # Agents are rewarded based on minimum agent distance to each landmark
-        return self.adversary_reward(agent, world) if agent.adversary else self.agent_reward(agent, world)
+        if agent.adversary:
+            return self.adversary_reward(agent, world, shaped)
+        else:
+            return self.agent_reward(agent, world, shaped)
 
-    def agent_reward(self, agent, world):
+    def agent_reward(self, agent, world, shaped):
         # Rewarded based on how close any good agent is to the goal landmark, and how far the adversary is from it
-        shaped_reward = True
-        shaped_adv_reward = True
+        shaped_reward = shaped
+        shaped_adv_reward = shaped
 
         # Calculate negative reward for adversary
         adversary_agents = self.adversaries(world)
@@ -107,9 +110,8 @@ class Scenario(BaseScenario):
                 [np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos))) for a in good_agents])
         return pos_rew + adv_rew
 
-    def adversary_reward(self, agent, world):
+    def adversary_reward(self, agent, world, shaped_reward):
         # Rewarded based on proximity to the goal landmark
-        shaped_reward = True
         if shaped_reward:  # distance-based reward
             return -np.sum(np.square(agent.state.p_pos - agent.goal_a.state.p_pos))
         else:  # proximity-based reward (binary)

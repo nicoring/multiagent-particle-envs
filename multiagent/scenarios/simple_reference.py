@@ -1,8 +1,8 @@
 import numpy as np
 from multiagent.core import World, Agent, Landmark
-from multiagent.scenario import BaseScenario
+from multiagent.scenario import ShapedRewardScenario
 
-class Scenario(BaseScenario):
+class Scenario(ShapedRewardScenario):
     def make_world(self):
         world = World()
         # set any world properties first
@@ -53,11 +53,21 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np.random.uniform(-1,+1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent, world):
-        if agent.goal_a is None or agent.goal_b is None:
-            return 0.0
-        dist2 = np.sum(np.square(agent.goal_a.state.p_pos - agent.goal_b.state.p_pos))
-        return -dist2 #np.exp(-dist2)
+    def _reward(self, agent, world, shaped):
+        reward = 0.0
+        for agent in world.agents:
+            if agent.goal_a is None or agent.goal_b is None:
+                continue
+            if shaped:
+                dist = self.dist(agent.goal_a, agent.goal_b)
+                reward -= dist
+            else:
+                reward += 1.0 if self.does_cover(agent.goal_a, agent.goal_b) else 0.0
+        return reward
+
+    def done(self, agent, world):
+        is_done = lambda agent: self.does_cover(agent.goal_a, agent.goal_b)
+        return all(is_done(a) for a in world.agents)
 
     def observation(self, agent, world):
         # goal positions

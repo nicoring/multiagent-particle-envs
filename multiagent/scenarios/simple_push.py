@@ -80,7 +80,11 @@ class Scenario(BaseScenario):
         neg_rew = np.sqrt(np.sum(np.square(agent.goal_a.state.p_pos - agent.state.p_pos)))
         #neg_rew = sum([np.sqrt(np.sum(np.square(a.state.p_pos - agent.state.p_pos))) for a in world.good_agents])
         return pos_rew - neg_rew
-               
+
+    # def done(self, agent, world):
+    #     """Episode is over when one of the good agents reaches the goal."""
+    #     return any([self.is_collision(agent, agent.goal_a) for agent in world.good_agents])
+
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
         entity_pos = []

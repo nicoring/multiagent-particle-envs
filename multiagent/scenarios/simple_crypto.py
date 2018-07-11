@@ -120,7 +120,6 @@ class Scenario(BaseScenario):
             rew -= np.sum(np.square(agent.state.c - agent.goal_a.color))
         return rew
 
-
     def observation(self, agent, world):
         # goal color
         goal_color = np.zeros(world.dim_color)

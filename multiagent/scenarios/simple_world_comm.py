@@ -1,9 +1,9 @@
 import numpy as np
 from multiagent.core import World, Agent, Landmark
-from multiagent.scenario import BaseScenario
+from multiagent.scenario import ShapedRewardScenario
 
 
-class Scenario(BaseScenario):
+class Scenario(ShapedRewardScenario):
     def make_world(self):
         world = World()
         # set any world properties first
@@ -122,14 +122,6 @@ class Scenario(BaseScenario):
         else:
             return 0
 
-
-    def is_collision(self, agent1, agent2):
-        delta_pos = agent1.state.p_pos - agent2.state.p_pos
-        dist = np.sqrt(np.sum(np.square(delta_pos)))
-        dist_min = agent1.size + agent2.size
-        return True if dist < dist_min else False
-
-
     # return all agents that are not adversaries
     def good_agents(self, world):
         return [agent for agent in world.agents if not agent.adversary]
@@ -138,11 +130,10 @@ class Scenario(BaseScenario):
     def adversaries(self, world):
         return [agent for agent in world.agents if agent.adversary]
 
-
-    def reward(self, agent, world):
+    def _reward(self, agent, world, shaped):
         # Agents are rewarded based on minimum agent distance to each landmark
         #boundary_reward = -10 if self.outside_boundary(agent) else 0
-        main_reward = self.adversary_reward(agent, world) if agent.adversary else self.agent_reward(agent, world)
+        main_reward = self.adversary_reward(agent, world, shaped) if agent.adversary else self.agent_reward(agent, world, shaped)
         return main_reward
 
     def outside_boundary(self, agent):
@@ -151,13 +142,11 @@ class Scenario(BaseScenario):
         else:
             return False
 
-
-    def agent_reward(self, agent, world):
+    def agent_reward(self, agent, world, shaped):
         # Agents are rewarded based on minimum agent distance to each landmark
         rew = 0
-        shape = False
         adversaries = self.adversaries(world)
-        if shape:
+        if shaped:
             for adv in adversaries:
                 rew += 0.1 * np.sqrt(np.sum(np.square(agent.state.p_pos - adv.state.p_pos)))
         if agent.collide:
@@ -182,13 +171,12 @@ class Scenario(BaseScenario):
 
         return rew
 
-    def adversary_reward(self, agent, world):
+    def adversary_reward(self, agent, world, shaped):
         # Agents are rewarded based on minimum agent distance to each landmark
         rew = 0
-        shape = True
         agents = self.good_agents(world)
         adversaries = self.adversaries(world)
-        if shape:
+        if shaped:
             rew -= 0.1 * min([np.sqrt(np.sum(np.square(a.state.p_pos - agent.state.p_pos))) for a in agents])
             #for adv in adversaries:
             #    rew -= 0.1 * min([np.sqrt(np.sum(np.square(a.state.p_pos - adv.state.p_pos))) for a in agents])
@@ -198,7 +186,6 @@ class Scenario(BaseScenario):
                     if self.is_collision(ag, adv):
                         rew += 5
         return rew
-
 
     def observation2(self, agent, world):
         # get positions of all entities in this agent's reference frame
@@ -302,8 +289,7 @@ class Scenario(BaseScenario):
             #print(np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + [in_forest] + comm).shape)
             return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + in_forest + comm)
         if agent.leader:
-            return np.concatenate(
-                [agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + in_forest + comm)
+            return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + other_vel + in_forest + comm)
         else:
             #print(np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + [in_forest] + other_vel).shape)
             return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + in_forest + other_vel)
