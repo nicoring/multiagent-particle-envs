@@ -57,13 +57,18 @@ class Scenario(ShapedRewardScenario):
 
     def benchmark_data(self, agent, world):
         # returns data for benchmarking purposes
-        return self.reward(agent, world)
+        a = world.agents[0]
+        dist = self.dist(a.goal_a, a.goal_b)
+        success = self.does_cover(a.goal_a, a.goal_b)
+        return { 'dist': dist, 'success': success }
 
     def _reward(self, agent, world, shaped=False):
         # squared distance from listener to landmark
         a = world.agents[0]
         if shaped:
             reward = -self.dist(a.goal_a, a.goal_b)
+            if self.does_cover(a.goal_a, a.goal_b):
+                reward += 10.0
         else:
             reward = 1.0 if self.does_cover(a.goal_a, a.goal_b) else 0.0
         return reward
