@@ -12,8 +12,6 @@ class Scenario(ShapedRewardScenario):
         for i, agent in enumerate(world.agents):
             agent.name = 'agent %d' % i
             agent.collide = False
-            # agent.u_noise = 1e-1
-            # agent.c_noise = 1e-1
         # add landmarks
         world.landmarks = [Landmark() for i in range(3)]
         for i, landmark in enumerate(world.landmarks):
@@ -70,16 +68,7 @@ class Scenario(ShapedRewardScenario):
         return all(is_done(a) for a in world.agents)
 
     def observation(self, agent, world):
-        # goal positions
-        # goal_pos = [np.zeros(world.dim_p), np.zeros(world.dim_p)]
-        # if agent.goal_a is not None:
-        #     goal_pos[0] = agent.goal_a.state.p_pos - agent.state.p_pos
-        # if agent.goal_b is not None:
-        #     goal_pos[1] = agent.goal_b.state.p_pos - agent.state.p_pos         
-        # goal color
         goal_color = [np.zeros(world.dim_color), np.zeros(world.dim_color)]
-        # if agent.goal_a is not None:
-        #     goal_color[0] = agent.goal_a.color
         if agent.goal_b is not None:
             goal_color[1] = agent.goal_b.color 
 
