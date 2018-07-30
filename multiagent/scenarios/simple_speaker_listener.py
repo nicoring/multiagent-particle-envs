@@ -67,7 +67,7 @@ class Scenario(ShapedRewardScenario):
         a = world.agents[0]
         if shaped:
             reward = -self.dist(a.goal_a, a.goal_b)
-            if self.does_cover(a.goal_a, a.goal_b):
+            if self.done(agent, world):
                 reward += 10.0
         else:
             reward = 1.0 if self.does_cover(a.goal_a, a.goal_b) else 0.0

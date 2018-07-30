@@ -61,6 +61,8 @@ class Scenario(ShapedRewardScenario):
                 reward -= dist
             else:
                 reward += 1.0 if self.does_cover(agent.goal_a, agent.goal_b) else 0.0
+        if shaped and self.done(agent, world):
+            reward += 10.0
         return reward
 
     def done(self, agent, world):
@@ -68,22 +70,14 @@ class Scenario(ShapedRewardScenario):
         return all(is_done(a) for a in world.agents)
 
     def observation(self, agent, world):
-        goal_color = [np.zeros(world.dim_color), np.zeros(world.dim_color)]
-        if agent.goal_b is not None:
-            goal_color[1] = agent.goal_b.color 
-
         # get positions of all entities in this agent's reference frame
         entity_pos = []
-        for entity in world.landmarks: #world.entities:
+        for entity in world.landmarks:
             entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # entity colors
-        entity_color = []
-        for entity in world.landmarks: #world.entities:
-            entity_color.append(entity.color)
         # communication of all other agents
         comm = []
         for other in world.agents:
             if other is agent: continue
             comm.append(other.state.c)
-        return np.concatenate([agent.state.p_vel] + entity_pos + [goal_color[1]] + comm)
+        return np.concatenate([agent.state.p_vel] + entity_pos + agent.goal_b.color + comm)
             

@@ -73,6 +73,8 @@ class Scenario(BaseScenario):
             for a in world.agents:
                 if self.is_collision(a, agent):
                     rew -= 1
+        if self.done(agent, world):
+            rew += 10.0
         return rew
 
     def done(self, agent, world):
