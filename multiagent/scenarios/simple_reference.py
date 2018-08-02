@@ -79,5 +79,5 @@ class Scenario(ShapedRewardScenario):
         for other in world.agents:
             if other is agent: continue
             comm.append(other.state.c)
-        return np.concatenate([agent.state.p_vel] + entity_pos + agent.goal_b.color + comm)
+        return np.concatenate([agent.state.p_vel] + entity_pos + [agent.goal_b.color] + comm)
             
